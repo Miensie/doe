@@ -183,9 +183,9 @@ function buildInteractionChart(factors, beta, termNames, responseLabel) {
       const base = new Array(k).fill(0);
       base[fi] = codedA;
       base[fj] = -1;
-      curve1.push({ x: decode(codedA, fA.min, fA.max), y: predictAt(base) });
+      curve1.push({ x: DOEEngine.decode(codedA, fA.min, fA.max), y: predictAt(base) });
       base[fj] = 1;
-      curve2.push({ x: decode(codedA, fA.min, fA.max), y: predictAt(base) });
+      curve2.push({ x: DOEEngine.decode(codedA, fA.min, fA.max), y: predictAt(base) });
     }
 
     const allY = [...curve1, ...curve2].map(p => p.y);
@@ -359,4 +359,5 @@ window.DOECharts = {
   buildMainEffectsChart,
   buildInteractionChart,
   buildResponseSurfaceChart,
+  decode
 };
