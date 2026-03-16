@@ -299,8 +299,9 @@ function buildResponseSurfaceChart(surfData, responseLabel) {
       for (let c = 0; c < gridN - 1; c++) {
         const v00 = grid[r][c], v01 = grid[r][c+1];
         const v10 = grid[r+1][c], v11 = grid[r+1][c+1];
-        const cross = (v, [v00, v01, v10, v11].some(v2 => v2 >= zc) &&
-                       [v00, v01, v10, v11].some(v2 => v2 < zc));
+        const vals  = [v00, v01, v10, v11];
+        const cross = vals.some(v2 => v2 >= zc) && vals.some(v2 => v2 < zc);
+        
         if (cross) {
           const x = ML + c * cellW + cellW/2;
           const y = MT + (gridN - 1 - r) * cellH + cellH/2;
