@@ -4,7 +4,7 @@
   "description": "Add-in Excel — Plans d'expériences (DOE) et optimisation par IA",
   "scripts": {
     "start":     "office-addin-dev-certs install --machine && webpack serve --mode development",
-    "build":     "cross-env NODE_ENV=production REPO_NAME=doe webpack --mode production",
+    "build":     "cross-env NODE_ENV=production REPO_NAME=doe-ai-addin webpack --mode production",
     "build:dev": "webpack --mode development",
     "validate":  "office-addin-manifest validate manifest.xml"
   },

@@ -183,9 +183,9 @@ function buildInteractionChart(factors, beta, termNames, responseLabel) {
       const base = new Array(k).fill(0);
       base[fi] = codedA;
       base[fj] = -1;
-      curve1.push({ x: DOEEngine.decode(codedA, fA.min, fA.max), y: predictAt(base) });
+      curve1.push({ x: decode(codedA, fA.min, fA.max), y: predictAt(base) });
       base[fj] = 1;
-      curve2.push({ x: DOEEngine.decode(codedA, fA.min, fA.max), y: predictAt(base) });
+      curve2.push({ x: decode(codedA, fA.min, fA.max), y: predictAt(base) });
     }
 
     const allY = [...curve1, ...curve2].map(p => p.y);
@@ -299,8 +299,8 @@ function buildResponseSurfaceChart(surfData, responseLabel) {
       for (let c = 0; c < gridN - 1; c++) {
         const v00 = grid[r][c], v01 = grid[r][c+1];
         const v10 = grid[r+1][c], v11 = grid[r+1][c+1];
-        const cross = (v = [v00, v01, v10, v11].some(v2 => v2 >= zc) && 
-                        [v00, v01, v10, v11].some(v2 => v2 < zc));
+        const cross = (v, [v00, v01, v10, v11].some(v2 => v2 >= zc) &&
+                       [v00, v01, v10, v11].some(v2 => v2 < zc));
         if (cross) {
           const x = ML + c * cellW + cellW/2;
           const y = MT + (gridN - 1 - r) * cellH + cellH/2;
@@ -359,5 +359,4 @@ window.DOECharts = {
   buildMainEffectsChart,
   buildInteractionChart,
   buildResponseSurfaceChart,
-  decode
 };

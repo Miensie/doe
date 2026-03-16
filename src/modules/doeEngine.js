@@ -19,6 +19,7 @@
 "use strict";
 
 // ─── Utilitaires mathématiques ────────────────────────────────────────────────
+
 function matMul(A, B) {
   // Multiplication matricielle A (m×n) * B (n×p) → (m×p)
   const m = A.length, n = B.length, p = B[0].length;

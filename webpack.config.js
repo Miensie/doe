@@ -20,22 +20,10 @@ module.exports = {
   },
   plugins: [
     ...(isProd ? [new MiniCssExtractPlugin({ filename: "[name].css" })] : []),
-    new HtmlWebpackPlugin({
-      filename:      "taskpane.html",
-      template:      "./src/taskpane/taskpane.html",
-      chunks:        ["taskpane"],
-      inject:        "body",          // injecter le bundle à la fin du <body>
-      scriptLoading: "defer",         // <script defer> — attend que Office.js soit prêt
-    }),
-    new HtmlWebpackPlugin({
-      filename:      "commands.html",
-      template:      "./src/taskpane/commands.html",
-      chunks:        ["commands"],
-      inject:        "body",
-      scriptLoading: "defer",
-    }),
+    new HtmlWebpackPlugin({ filename: "taskpane.html", template: "./src/taskpane/taskpane.html", chunks: ["taskpane"], inject: true }),
+    new HtmlWebpackPlugin({ filename: "commands.html", template: "./src/taskpane/commands.html", chunks: ["commands"], inject: true }),
     new CopyWebpackPlugin({ patterns: [
-      { from: "src/assets",   to: "assets", noErrorOnMissing: true },
+      { from: "src/assets", to: "assets", noErrorOnMissing: true },
       { from: "manifest.xml", to: "manifest.xml" },
     ]}),
   ],

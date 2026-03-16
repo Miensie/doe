@@ -7,7 +7,7 @@
 "use strict";
 
 const GEMINI_DOE = {
-  endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent",
+  endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent",
   maxTokens: 2048,
   storageKey: "doe_gemini_key",
 };
