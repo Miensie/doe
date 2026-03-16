@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>DOE·AI — Plans d'Expériences</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230D1B2A%22/><text y=%2224%22 x=%2216%22 text-anchor=%22middle%22 font-size=%2220%22 fill=%22%2300E5FF%22>⬡</text></svg>">
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-hex">⬡</div>
+    <div>
+      <div class="brand-name">DOE<span class="brand-dot">·</span>AI</div>
+      <div class="brand-sub">Plans d'expériences &amp; Optimisation</div>
+    </div>
+  </div>
+  <div id="hdr-status" class="hdr-status">Initialisation…</div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="ntab active" data-panel="p-design">
+    <span class="ni">⊡</span><span class="nl">Facteurs</span>
+  </button>
+  <button class="ntab" data-panel="p-matrix">
+    <span class="ni">⊞</span><span class="nl">Plan</span>
+  </button>
+  <button class="ntab" data-panel="p-analysis">
+    <span class="ni">∿</span><span class="nl">Analyse</span>
+  </button>
+  <button class="ntab" data-panel="p-charts">
+    <span class="ni">◈</span><span class="nl">Graphiques</span>
+  </button>
+  <button class="ntab" data-panel="p-optim">
+    <span class="ni">✦</span><span class="nl">Optimisation</span>
+  </button>
+  <button class="ntab" data-panel="p-report">
+    <span class="ni">▤</span><span class="nl">Rapport</span>
+  </button>
+</nav>
+
+<main class="main">
+
+  <!-- ═══ PANEL : FACTEURS ═══ -->
+  <section id="p-design" class="panel active">
+    <div class="ph">
+      <h2>Définition des facteurs</h2>
+      <p class="ps">Entrez les facteurs, leurs niveaux et le type de plan à générer.</p>
+    </div>
+
+    <div class="card">
+      <div class="cl">PARAMÈTRES DU PLAN</div>
+      <div class="fg2">
+        <div class="ff">
+          <label>Nom de l'expérience</label>
+          <input type="text" id="exp-name" placeholder="ex: Optimisation fermentation"/>
+        </div>
+        <div class="ff">
+          <label>Variable réponse</label>
+          <input type="text" id="exp-resp" placeholder="ex: Rendement (%)"/>
+        </div>
+        <div class="ff">
+          <label>Type de plan</label>
+          <select id="doe-type" class="sel">
+            <option value="full">Factoriel complet 2^k</option>
+            <option value="fractional">Factoriel fractionnaire 2^(k-p)</option>
+            <option value="ccd">Central Composite (CCD)</option>
+            <option value="bbd">Box-Behnken (BBD)</option>
+            <option value="custom">Niveaux personnalisés</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Points centraux</label>
+          <input type="number" id="center-pts" value="3" min="0" max="10"/>
+        </div>
+        <div class="ff">
+          <label>Objectif d'optimisation</label>
+          <select id="opt-goal" class="sel">
+            <option value="maximize">Maximiser la réponse</option>
+            <option value="minimize">Minimiser la réponse</option>
+            <option value="target">Atteindre une cible</option>
+          </select>
+        </div>
+        <div class="ff" id="target-row" style="display:none">
+          <label>Valeur cible</label>
+          <input type="number" id="opt-target" placeholder="ex: 85"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cl">FACTEURS EXPÉRIMENTAUX</div>
+      <div id="factors-list"></div>
+      <button class="btn btn-ghost" id="btn-add-factor" style="margin-top:8px">
+        + Ajouter un facteur
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="cl">DONNÉES DE DÉMONSTRATION</div>
+      <p class="cn">Optimisation enzymatique — Température (40–80°C), pH (3–7), Temps (10–30 min) — CCD 3 facteurs.</p>
+      <button class="btn btn-ghost" id="btn-demo">▶ Charger la démonstration</button>
+    </div>
+
+    <div class="card">
+      <button class="btn btn-primary" id="btn-generate">
+        ⊞ Générer le plan d'expérience
+      </button>
+    </div>
+    <div id="log-design" class="logp"></div>
+  </section>
+
+  <!-- ═══ PANEL : PLAN ═══ -->
+  <section id="p-matrix" class="panel">
+    <div class="ph">
+      <h2>Matrice expérimentale</h2>
+      <p class="ps">Plan généré — saisissez les réponses dans la colonne correspondante.</p>
+    </div>
+
+    <div class="card" id="matrix-empty">
+      <div class="empty-ph">
+        <div class="empty-ic">⊞</div>
+        <p>Définissez les facteurs et générez le plan.</p>
+      </div>
+    </div>
+
+    <div id="matrix-content" style="display:none">
+      <div class="card">
+        <div class="cl">INFORMATIONS DU PLAN</div>
+        <div id="plan-info" class="info-grid"></div>
+      </div>
+      <div class="card">
+        <div class="cl">MATRICE — <span id="matrix-n">0</span> ESSAIS</div>
+        <div class="tscroll">
+          <table class="dt" id="matrix-table">
+            <thead id="matrix-thead"></thead>
+            <tbody id="matrix-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <button class="btn btn-primary" id="btn-write-matrix">
+          ⊞ Écrire le plan dans Excel
+        </button>
+        <button class="btn btn-sec" id="btn-read-responses" style="margin-top:6px">
+          ↓ Lire les réponses depuis Excel
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PANEL : ANALYSE ═══ -->
+  <section id="p-analysis" class="panel">
+    <div class="ph">
+      <h2>Analyse statistique</h2>
+      <p class="ps">Régression polynomiale, ANOVA, effets principaux et interactions.</p>
+    </div>
+
+    <div class="card" id="analysis-empty">
+      <div class="empty-ph">
+        <div class="empty-ic">∿</div>
+        <p>Saisissez les réponses puis lancez l'analyse.</p>
+      </div>
+    </div>
+
+    <div id="analysis-content" style="display:none">
+      <div class="card">
+        <div class="cl">MODÈLE DE RÉGRESSION</div>
+        <div id="model-eq" class="model-box"></div>
+        <div class="stats-row" id="model-stats"></div>
+      </div>
+
+      <div class="card">
+        <div class="cl">TABLE ANOVA</div>
+        <div class="tscroll">
+          <table class="dt results-table">
+            <thead><tr>
+              <th>Source</th><th>SS</th><th>df</th><th>MS</th><th>F</th><th>p-valeur</th><th>Signif.</th>
+            </tr></thead>
+            <tbody id="anova-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cl">EFFETS PRINCIPAUX ET INTERACTIONS</div>
+        <div class="tscroll">
+          <table class="dt results-table">
+            <thead><tr>
+              <th>Terme</th><th>Coefficient</th><th>Erreur std.</th><th>t</th><th>p-valeur</th><th>Signif.</th>
+            </tr></thead>
+            <tbody id="effects-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cl">DIAGNOSTICS DU MODÈLE</div>
+        <div id="diagnostics-box"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PANEL : GRAPHIQUES ═══ -->
+  <section id="p-charts" class="panel">
+    <div class="ph">
+      <h2>Visualisations scientifiques</h2>
+      <p class="ps">Effets principaux, interactions, surface de réponse — SVG intégré + export Excel.</p>
+    </div>
+
+    <div class="card" id="charts-empty">
+      <div class="empty-ph">
+        <div class="empty-ic">◈</div>
+        <p>Lancez l'analyse pour générer les graphiques.</p>
+      </div>
+    </div>
+
+    <div id="charts-content" style="display:none">
+      <div class="card">
+        <div class="cl">EFFETS PRINCIPAUX</div>
+        <div id="chart-main-effects" class="svg-wrap"></div>
+      </div>
+
+      <div class="card">
+        <div class="cl">DIAGRAMME DES INTERACTIONS</div>
+        <div id="chart-interactions" class="svg-wrap"></div>
+      </div>
+
+      <div class="card">
+        <div class="cl">SURFACE DE RÉPONSE — Facteurs à sélectionner</div>
+        <div class="fg3" style="margin-bottom:8px">
+          <div class="ff">
+            <label>Axe X</label>
+            <select id="surf-x" class="sel"></select>
+          </div>
+          <div class="ff">
+            <label>Axe Y</label>
+            <select id="surf-y" class="sel"></select>
+          </div>
+          <div class="ff">
+            <button class="btn btn-sec" id="btn-update-surface" style="margin-top:14px">Mettre à jour</button>
+          </div>
+        </div>
+        <div id="chart-surface" class="svg-wrap"></div>
+      </div>
+
+      <div class="card">
+        <button class="btn btn-sec" id="btn-insert-charts">
+          ⊞ Insérer les graphiques dans Excel
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PANEL : OPTIMISATION ═══ -->
+  <section id="p-optim" class="panel">
+    <div class="ph">
+      <h2>Optimisation par IA</h2>
+      <p class="ps">Conditions optimales, prédiction de la réponse et analyse de sensibilité.</p>
+    </div>
+
+    <div class="card">
+      <div class="cl">API GEMINI</div>
+      <div class="input-row" style="margin-bottom:4px">
+        <input type="password" id="gemini-key" placeholder="AIza…" autocomplete="off"/>
+        <button class="btn-icon" id="btn-save-key" title="Sauvegarder">💾</button>
+      </div>
+      <div class="api-note">Clé sur <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> · modèle : gemini-2.5-flash-lite</div>
+    </div>
+
+    <div class="card">
+      <div class="cl">OPTIMISATION NUMÉRIQUE (Grille)</div>
+      <div id="optim-config" class="optim-sliders"></div>
+      <div class="fg2" style="margin-top:8px">
+        <div class="ff">
+          <label>Résolution de la grille</label>
+          <select id="grid-res" class="sel">
+            <option value="20">Rapide (20 pts)</option>
+            <option value="50" selected>Standard (50 pts)</option>
+            <option value="100">Fine (100 pts)</option>
+          </select>
+        </div>
+        <div class="ff">
+          <button class="btn btn-primary" id="btn-optimize" style="margin-top:14px">
+            ✦ Lancer l'optimisation
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="optim-results" style="display:none">
+      <div class="card">
+        <div class="cl">CONDITIONS OPTIMALES</div>
+        <div id="optim-best" class="optim-result"></div>
+      </div>
+      <div class="card">
+        <div class="cl">TOP 5 SOLUTIONS</div>
+        <div class="tscroll">
+          <table class="dt results-table" id="optim-table">
+            <thead id="optim-thead"></thead>
+            <tbody id="optim-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cl">INTERPRÉTATION IA</div>
+      <div class="ai-actions">
+        <button class="btn btn-primary"   id="btn-ai-optim">✦ Interpréter les résultats complets</button>
+        <button class="btn btn-sec" id="btn-ai-factors">⊡ Analyser les facteurs significatifs</button>
+        <button class="btn btn-sec" id="btn-ai-suggest">⬡ Suggestions expérimentales</button>
+      </div>
+      <div id="ai-result" class="ai-box" style="display:none"></div>
+    </div>
+
+    <div class="card">
+      <div class="cl">ASSISTANT DOE</div>
+      <div id="chat-msgs" class="chat-box">
+        <div class="chat-msg asst">
+          <div class="cb">Bonjour. Je suis spécialisé en plans d'expériences et optimisation des procédés. Générez votre DOE, puis posez vos questions.</div>
+        </div>
+      </div>
+      <div class="chat-in-row">
+        <input type="text" id="chat-input" placeholder="Question sur votre expérience…"/>
+        <button class="btn-send" id="btn-chat">➤</button>
+      </div>
+      <div class="chat-chips">
+        <button class="chip" data-p="Quels facteurs sont les plus significatifs ?">Facteurs clés ?</button>
+        <button class="chip" data-p="Comment améliorer le modèle de régression ?">Améliorer R² ?</button>
+        <button class="chip" data-p="Y a-t-il des interactions importantes entre les facteurs ?">Interactions ?</button>
+        <button class="chip" data-p="Proposez un plan de validation des conditions optimales.">Plan validation</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PANEL : RAPPORT ═══ -->
+  <section id="p-report" class="panel">
+    <div class="ph">
+      <h2>Rapport DOE</h2>
+      <p class="ps">Rapport scientifique complet avec matrice, ANOVA, graphiques et interprétation IA.</p>
+    </div>
+
+    <div class="card">
+      <div class="cl">EN-TÊTE</div>
+      <div class="fg2">
+        <div class="ff"><label>Laboratoire</label><input type="text" id="rpt-labo" placeholder="Nom du laboratoire"/></div>
+        <div class="ff"><label>Auteur</label><input type="text" id="rpt-auteur" placeholder="Prénom NOM"/></div>
+        <div class="ff"><label>Référence</label><input type="text" id="rpt-ref" placeholder="DOE-2025-001"/></div>
+        <div class="ff"><label>Version</label><input type="text" id="rpt-version" placeholder="1.0"/></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cl">SECTIONS</div>
+      <div class="cb-list">
+        <label class="cbrow"><input type="checkbox" id="rpt-params"  checked/> Paramètres du plan</label>
+        <label class="cbrow"><input type="checkbox" id="rpt-matrix"  checked/> Matrice expérimentale</label>
+        <label class="cbrow"><input type="checkbox" id="rpt-anova"   checked/> ANOVA et coefficients</label>
+        <label class="cbrow"><input type="checkbox" id="rpt-effects" checked/> Graphique des effets</label>
+        <label class="cbrow"><input type="checkbox" id="rpt-surface" checked/> Surface de réponse</label>
+        <label class="cbrow"><input type="checkbox" id="rpt-optim"   checked/> Conditions optimales</label>
+        <label class="cbrow"><input type="checkbox" id="rpt-ai"      checked/> Interprétation IA</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <button class="btn btn-primary" id="btn-report">
+        🌐 Télécharger le rapport HTML
+      </button>
+    </div>
+    <div id="log-report" class="logp"></div>
+  </section>
+
+</main>
+<div id="toast-ct"></div>
+</body>
+</html>
